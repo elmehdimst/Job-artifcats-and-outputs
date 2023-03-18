@@ -43,5 +43,6 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: package
+      - run: echo ${{ needs.build.outputs.script-file }}
       - name: Deploy
         run: echo "Deploying..."
