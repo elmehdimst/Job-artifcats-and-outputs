@@ -36,6 +36,8 @@ jobs:
           name: package
           path: dist/
       - run: echo ${{ steps.publish.outputs.file }}
+      - name: Export outputs
+        run: echo ${{ needs.build.outputs.script-file }}
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -43,6 +45,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: package
-      - run: echo ${{ needs.build.outputs.script-file }}
+      - name: Import outputs
+        run: echo ${{ needs.build.outputs.script-file }}
       - name: Deploy
         run: echo "Deploying..."
