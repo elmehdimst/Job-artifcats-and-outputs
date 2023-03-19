@@ -16,7 +16,7 @@ jobs:
 
       - name: Get npm cache directory
         id: npm-cache-dir
-        run: echo "dir=$(npm config get cache)" >> $GITHUB_ENV
+        run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
 
       - name: Cache npm dependencies
         uses: actions/cache@v2
@@ -56,7 +56,7 @@ jobs:
         id: publish
         run: |
           file=$(find dist -name 'index*.js' -type f)
-          echo "file=${file}" >> $GITHUB_ENV
+          echo "file=${file}" >> $GITHUB_OUTPUT
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
