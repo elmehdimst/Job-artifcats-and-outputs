@@ -7,7 +7,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     outputs: 
-      cache-dir: dir
+      cache-dir: ${{ steps.npm-cache-dir.outputs.dir }}
     steps:
       - name: Get code
         uses: actions/checkout@v3
