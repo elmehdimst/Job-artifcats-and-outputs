@@ -1,67 +1,67 @@
 name: Deploy website
+
 on:
   push:
     branches:
       - main
+
 jobs:
   test:
     runs-on: ubuntu-latest
     outputs: 
-      cache-dir: dir
+      cache-dir: ${{ steps.npm-cache-dir.outputs.dir }}
     steps:
       - name: Get code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
+
       - name: Get npm cache directory
         id: npm-cache-dir
-        shell: bash
-        run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
+        run: echo "dir=$(npm config get cache)" >> $GITHUB_ENV
+
       - name: Cache npm dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v2
         with:
           path: ${{ steps.npm-cache-dir.outputs.dir }}
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
       - name: Install dependencies
         run: npm ci
+
       - name: Lint code
         run: npm run lint
+
       - name: Test code
         run: npm run test
+
   build:
     needs: test
     runs-on: ubuntu-latest
-    outputs:
-      script-file: ${{ steps.publish.outputs.file }}
     steps:
       - name: Get code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
+
       - name: Cache npm dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v2
         with:
           path: ${{ needs.test.outputs.cache-dir }}
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
       - name: Install dependencies
         run: npm ci
+
       - name: Build website
         run: npm run build
+
       - name: Publish JS filename
         id: publish
-        run: find dist -name 'index*.js' -type f -execdir echo 'file={}' >> $GITHUB_OUTPUT ';'
-      - name: Upload artificat
-        uses: actions/upload-artifact@v3
+        run: |
+          file=$(find dist -name 'index*.js' -type f)
+          echo "file=${file}" >> $GITHUB_ENV
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
         with:
           name: package
           path: dist/
+
       - run: echo ${{ steps.publish.outputs.file }}
-      - name: Export outputs
-        run: echo ${{ needs.build.outputs.script-file }}
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v3
-        with:
-          name: package
-      - name: Import outputs
-        run: echo ${{ needs.build.outputs.script-file }}
-      - name: Deploy
-        run: echo "Deploying..."
